@@ -114,8 +114,11 @@ gamma = .1
 
 eta_ave = .3
 
-Y_ave = p
-Cyy_ave = p**2
+Y_ave1 = p
+Y_ave2 = p
+Cyy_ave1 = p**2
+Cyy_ave2 = p**2
+
 
 # Zero timing variables
 data_time = 0.
@@ -140,11 +143,11 @@ for tt in xrange(num_trials):
     
     dt = time.time()
     # Calculate network activities
-    Y = activities(X,Q1,W1,theta1,Q2,W2,theta2)
-    muy = np.mean(Y,axis=1)
-    muy = np.mean(Y,axis=1)
-    Cyy1 = Y.T1.dot(Y)/batch_size
-    Cyy2 = Y.T2.dot(Y)/batch_size
+    Y1,Y2 = activities(X,Q1,W1,theta1,Q2,W2,theta2)
+    muy1 = np.mean(Y1,axis=1)
+    muy2 = np.mean(Y2,axis=1)
+    Cyy1 = Y1.T.dot(Y1)/batch_size
+    Cyy2 = Y2.T.dot(Y2)/batch_size
 
     # Update lateral weights
     dW1 = alpha*(Cyy1-p**2)
@@ -158,27 +161,35 @@ for tt in xrange(num_trials):
     W2[W2 < 0] = 0.
 
     # Update feedforward weights
-    square_act = np.sum(Y*Y,axis=0)
-    mymat = np.diag(square_act)
-    dQ1 = beta*X.T1.dot(Y)/batch_size - beta*Q1.dot(mymat)/batch_size
+    square_act1 = np.sum(Y1*Y1,axis=0)
+    square_act2 = np.sum(Y2*Y1,axis=0)
+    mymat1 = np.diag(square_act1)
+    mymat2 = np.diag(square_act2)
+    dQ1 = beta*X.T.dot(Y1)/batch_size - beta*Q1.dot(mymat1)/batch_size
     Q1 += dQ1
-    dQ2 = beta*X.T2.dot(Y)/batch_size - beta*Q2.dot(mymat)/batch_size
+    dQ2 = beta*Y1.T.dot(Y2)/batch_size - beta*Q2.dot(mymat2)/batch_size
     Q2 += dQ2
 
     # Update thresholds
-    dtheta = gamma*(np.sum(Y,axis=0)/batch_size-p)
-    theta1 += dtheta
-    theta2 += dtheta
+    dtheta1 = gamma*(np.sum(Y1,axis=0)/batch_size-p)
+    dtheta2 = gamma*(np.sum(Y2,axis=0)/batch_size-p)
+    theta1 += dtheta1
+    theta2 += dtheta2
     dt = time.time()-dt
     algo_time += dt/60.
 
-    Y_ave = (1.-eta_ave)*Y_ave + eta_ave*muy
-    Cyy_ave=(1.-eta_ave)*Cyy_ave + eta_ave*Cyy1
-    Cyy_ave=(1.-eta_ave)*Cyy_ave + eta_ave*Cyy2
+    Y_ave1 = (1.-eta_ave)*Y_ave1 + eta_ave*muy1
+    Y_ave2 = (1.-eta_ave)*Y_ave2 + eta_ave*muy2
+    Cyy_ave1=(1.-eta_ave)*Cyy_ave1 + eta_ave*Cyy1
+    Cyy_ave2=(1.-eta_ave)*Cyy_ave2 + eta_ave*Cyy2
     if tt%100 == 0:
         print 'Batch: '+str(tt)+' out of '+str(num_trials)
         print 'Cumulative time spent gathering data: '+str(data_time)+' min'
         print 'Cumulative time spent in SAILnet: '+str(algo_time)+' min'
+        print 'print spiking rates of neuron in layer 1' +str(Y_ave1)
+        print 'print spiking rates of neuron in layer 2' +str(Y_ave2)
+        #print 'correlation of timing in layer 1' Cyy_ave1        
+        
         print ''
     total_time = data_time+algo_time
 print 'Percent time spent gathering data: '+str(data_time/total_time)+' %'
