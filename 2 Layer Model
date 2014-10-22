@@ -10,6 +10,10 @@ def activities(X,Q1,W1,theta1,Q2,W2,theta2):
     M2 = Q2.shape[1] #dimension M1 x M2
 
     num_iterations = 50
+    
+    '''
+    Increasing the number of iterations increases the number of dark patches, hence connection strength 
+    '''
 
     eta = .1
 
@@ -77,12 +81,17 @@ BUFF = 20 #number of pixels outside of image that don't get sampled from for inp
 #Layer 1
 N = 256 #number of inputs
 sz = np.sqrt(N).astype(np.int)
-OC1 = .1 #overcompleteness
+OC1 = 1 #overcompleteness 
 M1 = OC1*N #number of neurons
+
+'''
+If OC1 does not equal OC2 we get an error due to mismatching
+Changing OC1 and OC2 from .1 to 1 increases the number of white patches
+'''
 
 #Layer 2
 sz = np.sqrt(N).astype(np.int)
-OC2 = .1 #overcompleteness WITH RESPECT TO LAYER 1
+OC2 = 1 #overcompleteness WITH RESPECT TO LAYER 1
 M2 = OC2*N #number of neurons
 
 # Network Parameters
@@ -209,7 +218,11 @@ print K[idx[-3]], ' index '+str(idx[-3])
 print K[idx[-4]], ' index '+str(idx[-4])
 print K[idx[-5]], ' index '+str(idx[-5])
         
-plt.imshow(Q2[1:], interpolation = 'nearest', cmap = 'gray')
+plt.imshow(Q2[1:], interpolation = 'nearest', cmap = 'gray') #generates image
+plt.imshow(Q2[2:], interpolation = 'nearest', cmap = 'gray')
+plt.imshow(Q2[3:], interpolation = 'nearest', cmap = 'gray')
+plt.imshow(Q2[4:], interpolation = 'nearest', cmap = 'gray')
+plt.imshow(Q2[5:], interpolation = 'nearest', cmap = 'gray')
 
 """
 syntax: [:,0] not specifying index before colon lists all
